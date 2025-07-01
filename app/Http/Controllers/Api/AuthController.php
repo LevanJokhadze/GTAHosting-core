@@ -23,7 +23,8 @@
         return response()->json([
             'message' => 'Login successful',
             'token_type' => 'Bearer', 
-            'token' => $token
+            'token' => $token,
+            "user" => $user
         ], 200);
     }
 
@@ -41,6 +42,7 @@
                 'message' => 'Registration successful',
                 'token_type' => 'Bearer',
                 'token' => $token,
+                
             ], 201);
         } else {
             return response()->json(['message' => 'User not created'], 500);
