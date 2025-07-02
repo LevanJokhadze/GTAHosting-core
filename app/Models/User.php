@@ -48,10 +48,10 @@ class User extends Authenticatable
     }
     // App\Models\User.php
 
-public function tasks()
-{
-    return $this->hasMany(Task::class);
-}
+// public function tasks()
+// {
+//     return $this->hasMany(Task::class);
+// }
 
 
 
