@@ -5,9 +5,11 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Servers;
 use Illuminate\Http\JsonResponse;
+use App\Models\UserServerStatus;
+use App\Services\HttpRequestService; 
 class ServersController extends Controller
 {
-public function store(Request $request):JsonResponse
+public function store(Request $request, HttpRequestService $apiService):JsonResponse
     {
         $validated = $request->validate([
             'serverId' => 'required|string|max:255',
@@ -19,9 +21,19 @@ public function store(Request $request):JsonResponse
         ]);
 
         $device = Servers::create($validated);
-        
+        UserServerStatus::create([
+        'user_id' => auth()->id(), 
+        'server_id' => $device->id,
+        'server_name' => $device->name,
+         'is_active' => false,
+    ]);
+    $serverDaemon = $apiService->createServer($device->name, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
 
-        return response()->json($device, 201);
+        return response()->json([
+            "success" => true,
+            "message"=> $device,
+            "daemon"=> $serverDaemon],
+             201);
     }
     public function index(): JsonResponse
     {
@@ -52,7 +64,7 @@ if (!$device) {
 
     public function show($id): JsonResponse
     {
-        $device = Servers::where("serverId", $id)->first();
+        $device = Servers::where("id", $id)->first();
         if (!$device) {
             return response()->json(['message' => 'Device not found'], 404);
         }
@@ -66,4 +78,16 @@ if (!$device) {
             ['message' => 'Device deleted successfully']
         );
     }
+
+
+
+public function start(Request $request, HttpRequestService $httpRequestService)
+{
+    $token = $request->bearerToken();
+    $serverId = $request->input('server_id');
+
+    $response = $httpRequestService->startServer($serverId, $token);
+
+    return response()->json($response);
+}
 }
