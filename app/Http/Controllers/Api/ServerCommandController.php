@@ -8,10 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\HttpRequestService; // Assuming you have a service for HTTP requests
 
 class ServerCommandController extends Controller
 {
-    public function handle(Request $request, $id): JsonResponse
+    public function handle(Request $request, $id, HttpRequestService $apiService): JsonResponse
     {
         try {
             // Validate the request
@@ -20,9 +21,8 @@ class ServerCommandController extends Controller
             ]);
 
             // Find the server
-            $server = Servers::findOrFail($id);
+            $server = Servers::where('name', $id)->firstOrFail();
             $user = Auth::user(); // or $request->user()
-
             // Determine if server should be active
             $isActive = $validated['command'] === 'start';
 
@@ -38,8 +38,18 @@ class ServerCommandController extends Controller
                 ]
             );
 
+            $staticToken = "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ";
+
+            if ($isActive) {
+                // If starting the server, call the API to start it
+                $response = $apiService->startServer($server->name, $staticToken);
+            } else {
+                // If stopping the server, call the API to stop it
+                $response = $apiService->stopServer($server->name, $staticToken);
+            }
+
             // Log for debugging
-            \Log::info('Server status updated', [
+            Log::info('Server status updated', [
                 'user_id' => $user->id,
                 'server_id' => $server->id,
                 'command' => $validated['command'],
@@ -49,7 +59,8 @@ class ServerCommandController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Server {$validated['command']}ed successfully",
+                'message' => "Server command executed successfully",
+                "daemon_response" => $response,
                 'data' => [
                     'server_id' => $server->id,
                     'server_name' => $server->name,
@@ -59,7 +70,7 @@ class ServerCommandController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Server command failed', [
+            Log::error('Server command failed', [
                 'error' => $e->getMessage(),
                 'user_id' => Auth::id(),
                 'server_id' => $id,
@@ -111,7 +122,7 @@ class ServerCommandController extends Controller
             $user = Auth::user();
 
             $userServers = UserServerStatus::with('server')
-                ->where('user_id', $user->id)
+                ->where('user_id', $user->id) 
                 ->get()
                 ->map(function ($userServer) {
                     return [

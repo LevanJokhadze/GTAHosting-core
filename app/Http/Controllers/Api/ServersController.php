@@ -9,7 +9,7 @@ use App\Models\UserServerStatus;
 use App\Services\HttpRequestService; 
 class ServersController extends Controller
 {
-public function store(Request $request):JsonResponse
+public function store(Request $request, HttpRequestService $apiService):JsonResponse
     {
         $validated = $request->validate([
             'serverId' => 'required|string|max:255',
@@ -21,15 +21,19 @@ public function store(Request $request):JsonResponse
         ]);
 
         $device = Servers::create($validated);
-
         UserServerStatus::create([
         'user_id' => auth()->id(), 
         'server_id' => $device->id,
         'server_name' => $device->name,
          'is_active' => false,
     ]);
+    $serverDaemon = $apiService->createServer($device->name, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
 
-        return response()->json($device, 201);
+        return response()->json([
+            "success" => true,
+            "message"=> $device,
+            "daemon"=> $serverDaemon],
+             201);
     }
     public function index(): JsonResponse
     {
@@ -86,5 +90,4 @@ public function start(Request $request, HttpRequestService $httpRequestService)
 
     return response()->json($response);
 }
-
 }
