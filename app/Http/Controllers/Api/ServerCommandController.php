@@ -89,12 +89,14 @@ class ServerCommandController extends Controller
     public function getStatus(Request $request, $id): JsonResponse
     {
         try {
-            $server = Servers::findOrFail($id);
+            $server = Servers::where('name', $id)->firstOrFail();
             $user = Auth::user();
 
-            $userServerStatus = UserServerStatus::where('user_id', $user->id)
-                ->where('server_id', $server->id)
+            $userServerStatus = UserServerStatus::where('user_id', $user->id)   
+                ->where('server_name', $server->name)
                 ->first();
+            
+            
 
             return response()->json([
                 'success' => true,
@@ -153,7 +155,7 @@ class ServerCommandController extends Controller
 
             $userServer = UserServerStatus::with('server')
                 ->where('user_id', $user->id)
-                ->where('server_id', $id)
+                ->where('server_name', $id)
                 ->firstOrFail();
 
             return response()->json([
@@ -180,7 +182,7 @@ class ServerCommandController extends Controller
         try {
             $user = Auth::user();
             $userServerStatus = UserServerStatus::where('user_id', $user->id)
-                ->where('server_id', $id)
+                ->where('server_name', $id)
                 ->firstOrFail();
 
             // Delete the user server status

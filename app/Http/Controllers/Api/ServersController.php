@@ -12,7 +12,6 @@ class ServersController extends Controller
 public function store(Request $request, HttpRequestService $apiService):JsonResponse
     {
         $validated = $request->validate([
-            'serverId' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'node' => 'required|string|max:255',
             'server' => 'required|string|max:255',
@@ -49,7 +48,6 @@ if (!$device) {
             return response()->json(['message' => 'Device not found'], 404);
         }
         $validated = $request->validate([
-            'serverId' => 'required|string|max:255',
             'name' => 'required|string|max:255',
             'node' => 'required|string|max:255',
             'server' => 'required|string|max:255',
