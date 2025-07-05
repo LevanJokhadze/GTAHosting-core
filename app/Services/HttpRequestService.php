@@ -76,4 +76,48 @@ class HttpRequestService
         'body' => $response->body()
     ];
 }
+
+   public function getServerLogs(string $serverId, string $token)
+{
+    $url = 'http://165.22.93.250:8080/api/server/'.$serverId.'/logs'; 
+
+    $response = Http::withHeaders([
+        'x-api-key' => $token,
+        'content-type' => 'application/json',
+        'Accept' => 'application/json',
+    ])->get($url);
+
+
+    if ($response->successful()) {
+        return $response->json();
+    }
+
+    return [
+        'error' => 'Failed to stop server',
+        'status' => $response->status(),
+        'body' => $response->body()
+    ];
+}
+
+   public function getServerStatus(string $serverId, string $token)
+{
+    $url = 'http://165.22.93.250:8080/api/server/'.$serverId.'/status'; 
+
+    $response = Http::withHeaders([
+        'x-api-key' => $token,
+        'content-type' => 'application/json',
+        'Accept' => 'application/json',
+    ])->get($url);
+
+
+    if ($response->successful()) {
+        return $response->json();
+    }
+
+    return [
+        'error' => 'Failed to stop server',
+        'status' => $response->status(),
+        'body' => $response->body()
+    ];
+}
     }

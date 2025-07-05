@@ -86,16 +86,19 @@ class ServerCommandController extends Controller
     }
 
     // Method to get current server status
-    public function getStatus(Request $request, $id): JsonResponse
+    public function getStatus(Request $request, $name, HttpRequestService $apiService): JsonResponse
     {
         try {
-            $server = Servers::where('name', $id)->firstOrFail();
+            $server = Servers::where('name', $name)->firstOrFail();
             $user = Auth::user();
+            $staticToken = "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ";
+
 
             $userServerStatus = UserServerStatus::where('user_id', $user->id)   
                 ->where('server_name', $server->name)
                 ->first();
             
+            $daemonResponse = $apiService->getServerStatus($name, $staticToken);
             
 
             return response()->json([
@@ -105,7 +108,36 @@ class ServerCommandController extends Controller
                     'server_name' => $server->name,
                     'is_active' => $userServerStatus ? $userServerStatus->is_active : false,
                     'status' => $userServerStatus && $userServerStatus->is_active ? 'started' : 'stopped'
-                ]
+                ],
+                "daemon" => $daemonResponse
+                ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get server status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+        public function getLogs(Request $request, $name, HttpRequestService $apiService): JsonResponse
+    {
+        try {
+            $server = Servers::where('name', $name)->firstOrFail();
+            $user = Auth::user();
+            $staticToken = "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ";
+
+
+            $userServerStatus = UserServerStatus::where('user_id', $user->id)   
+                ->where('server_name', $server->name)
+                ->first();
+
+            $daemonResponse = $apiService->getServerLogs($name, $staticToken);
+            
+            return response()->json([
+                'success' => true,
+                'data' => $daemonResponse
             ]);
 
         } catch (\Exception $e) {
@@ -117,7 +149,7 @@ class ServerCommandController extends Controller
         }
     }
 
-    // Method to get all user's servers with their status
+
     public function getUserServers(Request $request): JsonResponse
     {
         try {

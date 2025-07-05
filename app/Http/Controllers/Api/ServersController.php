@@ -62,7 +62,7 @@ if (!$device) {
 
     public function show($id): JsonResponse
     {
-        $device = Servers::where("id", $id)->first();
+        $device = Servers::where("name", $id)->first();
         if (!$device) {
             return response()->json(['message' => 'Device not found'], 404);
         }
