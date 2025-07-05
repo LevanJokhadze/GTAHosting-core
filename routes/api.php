@@ -25,6 +25,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/server', [ServerCommandController::class, 'getUserServers']);
     Route::get('/server/{id}', [ServerCommandController::class, 'getUserServers']);
     Route::delete('/server/{id}/command', [ServerCommandController::class, 'deleteCommand']);
+Route::get('/server/{name}/logs', [ServersController::class, 'getServerLogs']);
+
 
 
 });

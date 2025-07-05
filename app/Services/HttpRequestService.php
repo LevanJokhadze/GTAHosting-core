@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
-
 class HttpRequestService
 {
     public function startServer(string $serverId, string $token)
@@ -75,5 +74,15 @@ class HttpRequestService
         'status' => $response->status(),
         'body' => $response->body()
     ];
+}
+public function getServerLogs(string $serverName, string $token)
+{
+    $url = 'http://165.22.93.250:8080/api/server/'.$serverName.'/logs';
+
+    $response = Http::withHeaders([
+        'x-api-key' => $token,
+        'content-type' => 'application/json'
+    ])->get($url);
+    return $response;
 }
     }

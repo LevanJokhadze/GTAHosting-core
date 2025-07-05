@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Servers;
 use Illuminate\Http\JsonResponse;
 use App\Models\UserServerStatus;
-use App\Services\HttpRequestService; 
+use App\Services\HttpRequestService;
+use Illuminate\Support\Facades\Http;
 class ServersController extends Controller
 {
 public function store(Request $request, HttpRequestService $apiService):JsonResponse
@@ -88,4 +89,25 @@ public function start(Request $request, HttpRequestService $httpRequestService)
 
     return response()->json($response);
 }
+public function getServerLogs($name,HttpRequestService $httpRequestService,Request $request)
+{
+    $server = Servers::where('name', $name)->first();
+
+    if (!$server) {
+        return response()->json([
+            'success' => false,
+            'message' => "Server with name '{$name}' not found."
+        ], 404);
+    }
+
+    $daemonServerId = $server->server;
+    $token = $request->bearerToken();
+    $response = $httpRequestService->getServerLogs($name,$token);
+
+        return response()->json([
+            'success' => true,
+            'server' => $name,
+            'logs' => $response->json()
+        ]);
+    }
 }
