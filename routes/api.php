@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/devices/{id}', [ServersController::class, 'destroy']);
 
     Route::post('/server/{id}/command', [ServerCommandController::class, 'handle']);
+    Route::post('/server/{name}/conf', [ServersController::class, 'setConfig']);
     Route::get('/server/{name}/status', [ServerCommandController::class, 'getStatus']);
     Route::get('/server', [ServerCommandController::class, 'getUserServers']);
     Route::get('/server/{name}/logs', [ServerCommandController::class, 'getLogs']);

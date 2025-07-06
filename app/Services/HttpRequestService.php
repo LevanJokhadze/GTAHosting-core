@@ -120,4 +120,18 @@ class HttpRequestService
         'body' => $response->body()
     ];
 }
+
+public function setConf($name, $config, $token)
+{
+    $url = 'http://165.22.93.250:8080/api/server/'.$name.'/conf';
+
+    $data = [
+        'server_id' => $serverId,
+    ];
+
+    $response = Http::withHeaders([
+        'x-api-key' => $token,
+    ])->post($url, $data);
+
+}
     }

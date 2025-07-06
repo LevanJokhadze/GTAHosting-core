@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Servers;
 use Illuminate\Http\JsonResponse;
 use App\Models\UserServerStatus;
+use App\Models\Ports;
 use App\Services\HttpRequestService; 
 class ServersController extends Controller
 {
@@ -26,12 +27,38 @@ public function store(Request $request, HttpRequestService $apiService):JsonResp
         'server_name' => $device->name,
          'is_active' => false,
     ]);
+    $ip = "165.22.93.250";
+    $maxPort = Ports::where('server_ip', $ip)
+    ->max('port');
+
+    if ($maxPort < 22003)
+    {
+        $maxPort = 22003;
+    }
+
+    // Ports table
+    $name = $request->name;
+    $newPort = $maxPort+= 2;
+
     $serverDaemon = $apiService->createServer($device->name, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
+
+
+
+    // Create Port
+
+    $port = Ports::create([
+        "server_name" => $name,
+        "server_ip" => $ip,
+        "port" => $newPort
+    ]);
+
 
         return response()->json([
             "success" => true,
             "message"=> $device,
-            "daemon"=> $serverDaemon],
+            "daemon"=> $serverDaemon,
+            "port" => $port
+        ],
              201);
     }
     public function index(): JsonResponse
@@ -84,8 +111,29 @@ public function start(Request $request, HttpRequestService $httpRequestService)
     $token = $request->bearerToken();
     $serverId = $request->input('server_id');
 
-    $response = $httpRequestService->startServer($serverId, $token);
+    $response = $httpRequestService->startServer($serverId, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
 
     return response()->json($response);
+}
+
+public function setConfig(Request $request, $name, HttpRequestService $httpRequestService)
+{
+    $user = $request->user();
+    $server = UserServerStatus::where('server_name', $name)->firstOrFail();
+
+    if ($user->id === $server->user_id)
+    {
+        $config = $request->config;
+        $response = $httpRequestService->setConf($name, $config, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
+
+        return response()->json($response);
+    }
+
+    return response()->json(
+        [   
+            'status' => "error",
+            'message' => 'You do not have permission to access this server'
+        ]
+    );
 }
 }
