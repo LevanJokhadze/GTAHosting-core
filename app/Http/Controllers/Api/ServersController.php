@@ -7,10 +7,12 @@ use App\Models\Servers;
 use Illuminate\Http\JsonResponse;
 use App\Models\UserServerStatus;
 use App\Models\Ports;
+use App\Models\Server_config;
+use App\Services\ConfigurationService;
 use App\Services\HttpRequestService; 
 class ServersController extends Controller
 {
-public function store(Request $request, HttpRequestService $apiService):JsonResponse
+public function store(Request $request, HttpRequestService $apiService, ConfigurationService $confService):JsonResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
@@ -52,12 +54,31 @@ public function store(Request $request, HttpRequestService $apiService):JsonResp
         "port" => $newPort
     ]);
 
+    $payload = [
+        "maxplayers" => $request->playerCount,
+        "name" => $request->name,
+        "gamemode" => "freeroam",
+        "stream-distance" => 500.0,
+        "announce" => false,
+        "csharp" => false,
+        "port" => $newPort,
+        "voice-chat" => false,
+        "voice-chat-sample-rate" => 48000,
+        "bind" => "0.0.0.0"
+    ];
+
+    // Create Config
+    $conf = Server_config::create($payload);
+
+    $confAnswer = $confService->updateConfig("oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ", $request->name, $payload);
+
 
         return response()->json([
             "success" => true,
             "message"=> $device,
             "daemon"=> $serverDaemon,
-            "port" => $port
+            "port" => $port,
+            "configuration" => $confAnswer
         ],
              201);
     }
