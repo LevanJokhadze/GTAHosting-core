@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Server_config extends Model
 {
+        protected $table = 'server_config'; 
         protected $fillable = [
         'server_name',
         'max_players',
         'gamemode',
-        'stream-distance',
+        'stream_distance',
         "announce",
         "cSharp",
         "port",
-        "voice-chat",
-        "voice-chat-sample-rate",
+        "voice_chat",
+        "voice_chat_sample_rate",
         "bind"
     ];
 }

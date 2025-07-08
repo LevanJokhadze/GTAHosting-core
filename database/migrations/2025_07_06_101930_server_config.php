@@ -15,12 +15,12 @@ return new class extends Migration
         $table->string('server_name');
         $table->integer("max_players");
         $table->string("gamemode");
-        $table->integer("stream-distance")->default(500.0);
+        $table->integer("stream_distance")->default(500.0);
         $table->boolean("announce");
         $table->boolean("cSharp");
         $table->string("port");
-        $table->boolean("voice-chat");
-        $table->integer("voice-chat-sample-rate")->default(48000);
+        $table->boolean("voice_chat");
+        $table->integer("voice_chat_sample_rate")->default(48000);
         $table->string("bind")->default("0.0.0.0");
         $table->timestamps();
     });

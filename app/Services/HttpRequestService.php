@@ -121,7 +121,7 @@ class HttpRequestService
     ];
 }
 
-public function setConf($name, $config, $token)
+public function setConf($name, $config, $token,$serverId)
 {
     $url = 'http://165.22.93.250:8080/api/server/'.$name.'/conf';
 

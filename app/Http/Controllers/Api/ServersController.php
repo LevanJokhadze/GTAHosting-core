@@ -55,15 +55,15 @@ public function store(Request $request, HttpRequestService $apiService, Configur
     ]);
 
     $payload = [
-        "maxplayers" => $request->playerCount,
-        "name" => $request->name,
+        "max_players" => $request->playerCount,
+        "server_name" => $request->name,
         "gamemode" => "freeroam",
-        "stream-distance" => 500.0,
+        "stream_distance" => 500.0,
         "announce" => false,
-        "csharp" => false,
+        "cSharp" => false,
         "port" => $newPort,
-        "voice-chat" => false,
-        "voice-chat-sample-rate" => 48000,
+        "voice_chat" => false,
+        "voice_chat_sample_rate" => 48000,
         "bind" => "0.0.0.0"
     ];
 
