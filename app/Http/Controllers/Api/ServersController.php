@@ -55,6 +55,11 @@ public function store(Request $request, HttpRequestService $apiService, Configur
     ]);
 
     $payload = [
+        
+    ];
+
+    // Create Config
+    $conf = Server_config::create([
         "max_players" => $request->playerCount,
         "server_name" => $request->name,
         "gamemode" => "freeroam",
@@ -65,20 +70,30 @@ public function store(Request $request, HttpRequestService $apiService, Configur
         "voice_chat" => false,
         "voice_chat_sample_rate" => 48000,
         "bind" => "0.0.0.0"
-    ];
+    ]);
 
-    // Create Config
-    $conf = Server_config::create($payload);
+    $success = $confService->updateConfig("oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ", $request->name, $payload);
 
-    $confAnswer = $confService->updateConfig("oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ", $request->name, $payload);
-
-
+    if ($success) {
+        // It worked! Redirect with a success message.
+        $confMessage = [
+            "message" => "Configuration saved! Please restart your server to apply changes.",
+            "config" => $success 
+            ];
+    } else {
+        // It failed. Get the error message from the service and show it to the user.
+        $errorMessage = $confService->lastError ?? 'An unknown error occurred.';
+        $confMessage = [
+            "message" => 'Failed to save configuration to the game server. ' . $errorMessage,
+            "config" => $success 
+            ];
+    }
         return response()->json([
             "success" => true,
             "message"=> $device,
             "daemon"=> $serverDaemon,
             "port" => $port,
-            "configuration" => $confAnswer
+            "configuration" => $confMessage
         ],
              201);
     }
