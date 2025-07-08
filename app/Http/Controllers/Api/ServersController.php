@@ -55,7 +55,16 @@ public function store(Request $request, HttpRequestService $apiService, Configur
     ]);
 
     $payload = [
-        
+        "maxplayers" => $request->playerCount,
+        "name" => $request->name,
+        "gamemode" => "freeroam",
+        "stream-distance" => 500.0,
+        "announce" => false,
+        "cSharp" => $request->csharpEnabled,
+        "port" => $newPort,
+        "voice-chat" => false,
+        "voice-chat-sample-rate" => 48000,
+        "bind" => "0.0.0.0"
     ];
 
     // Create Config
@@ -152,17 +161,33 @@ public function start(Request $request, HttpRequestService $httpRequestService)
     return response()->json($response);
 }
 
-public function setConfig(Request $request, $name, HttpRequestService $httpRequestService)
+public function setConfig(Request $request, $name, ConfigurationService $ConfigurationService)
 {
     $user = $request->user();
     $server = UserServerStatus::where('server_name', $name)->firstOrFail();
-
+    $port = Ports::where('server_name', $name)->firstOrFail();
     if ($user->id === $server->user_id)
     {
-        $config = $request->config;
-        $response = $httpRequestService->setConf($name, $config, "oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ");
+            $payload = [
+        "maxplayers" => $request->playerCount,
+        "gamemode" => $request->gamemode,
+        "stream-distance" => $request->streamDistance,
+        "announce" => $request->announce,
+        "cSharp" => $request->csharpEnabled,
+        "port" => $port->port,
+        "voice-chat" => $request->voiceChatEnabled,
+        "voice-chat-sample-rate" => 48000,
+        "bind" => "0.0.0.0"
+    ];
+        $response = $ConfigurationService->updateConfig("oKHLuxNXRmDeBYsZhmikSLxKUcGNhgqZ",$name, $payload);
 
-        return response()->json($response);
+        return response()->json(
+            [
+                'status' => "success",
+                'message' => 'Configuration updated successfully',
+                'data' => $response
+            ]
+        );
     }
 
     return response()->json(
